@@ -23,8 +23,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 // Routes
 const authRoutes = require('./routes/authRoutes');
 const teamRoutes = require('./routes/teamRoutes');
+const taskRoutes = require('./routes/taskRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/teams', teamRoutes);
+app.use('/api/tasks', taskRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'TaskFlow API is running...' });
