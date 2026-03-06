@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/AuthContext';
 import { getDashboardStats, getMyTeams } from '../services/api';
 
 const Dashboard = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);

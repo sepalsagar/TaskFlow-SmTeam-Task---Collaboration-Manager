@@ -9,7 +9,7 @@ import {
   getComments,
   addComment,
   deleteComment,
-  uploadAttachment,
+  uploadTaskFile,
 } from '../services/api';
 
 const TaskDetail = () => {
@@ -114,7 +114,7 @@ const TaskDetail = () => {
     const formData = new FormData();
     formData.append('file', file);
     try {
-      await uploadAttachment(id, formData);
+      await uploadTaskFile(id, formData);
       setFile(null);
       fetchTask();
     } catch (err) {
@@ -265,7 +265,7 @@ const TaskDetail = () => {
               {task.attachments.map((att, idx) => (
                 <li key={idx}>
                   <a href={`/${att.path}`} target="_blank" rel="noreferrer">
-                    {att.originalName}
+                    {att.filename}
                   </a>
                   <span className="text-muted"> ({(att.size / 1024).toFixed(1)} KB)</span>
                 </li>

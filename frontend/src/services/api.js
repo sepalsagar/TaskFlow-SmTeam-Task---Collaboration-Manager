@@ -25,6 +25,7 @@ export const getTeamById = (id) => API.get(`/teams/${id}`);
 export const addTeamMember = (teamId, data) => API.post(`/teams/${teamId}/members`, data);
 export const removeTeamMember = (teamId, userId) => API.delete(`/teams/${teamId}/members/${userId}`);
 export const getTeamMembers = (teamId) => API.get(`/teams/${teamId}/members`);
+export const updateTeam = (teamId, data) => API.put(`/teams/${teamId}`, data);
 
 // Tasks
 export const createTask = (data) => API.post('/tasks', data);
@@ -34,10 +35,7 @@ export const getTaskById = (id) => API.get(`/tasks/${id}`);
 export const updateTask = (id, data) => API.put(`/tasks/${id}`, data);
 export const updateTaskStatus = (id, data) => API.patch(`/tasks/${id}/status`, data);
 export const deleteTask = (id) => API.delete(`/tasks/${id}`);
-export const uploadAttachment = (id, formData) =>
-  API.post(`/tasks/${id}/attachments`, formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+
 
 // Comments
 export const getComments = (taskId) => API.get(`/comments/task/${taskId}`);
@@ -52,7 +50,6 @@ export const getAllUsers = (params) => API.get('/admin/users', { params });
 export const getAdminUsers = getAllUsers;
 export const getAllTeams = (params) => API.get('/admin/teams', { params });
 export const getAdminTeams = () => API.get('/admin/teams');
-export const getAllTasks = (params) => API.get('/admin/tasks', { params });
 export const getAdminStats = () => API.get('/admin/stats');
 export const updateUserRole = (userId, role) => API.put(`/admin/users/${userId}/role`, { role });
 export const deleteUser = (userId) => API.delete(`/admin/users/${userId}`);
