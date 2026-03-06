@@ -24,9 +24,13 @@ router.get('/team/:teamId', getTasksByTeam);
 router.post(
   '/',
   [
-    body('title').trim().notEmpty().withMessage('Title is required'),
-    body('deadline').notEmpty().withMessage('Deadline is required'),
-    body('team').notEmpty().withMessage('Team is required'),
+    body('title').trim().notEmpty().withMessage('Title is required').isLength({ max: 200 }).withMessage('Title max 200 chars'),
+    body('description').optional().trim().isLength({ max: 5000 }).withMessage('Description max 5000 chars'),
+    body('deadline').notEmpty().withMessage('Deadline is required').isISO8601().withMessage('Invalid date format'),
+    body('team').notEmpty().withMessage('Team is required').isMongoId().withMessage('Invalid team ID'),
+    body('assignedTo').optional().isMongoId().withMessage('Invalid user ID'),
+    body('priority').optional().isIn(['Low', 'Medium', 'High']).withMessage('Priority must be Low, Medium, or High'),
+    body('status').optional().isIn(['Pending', 'In Progress', 'Completed']).withMessage('Invalid status'),
   ],
   createTask
 );
@@ -40,7 +44,7 @@ router.put('/:id', updateTask);
 // @route   PATCH /api/tasks/:id/status
 router.patch(
   '/:id/status',
-  [body('status').notEmpty().withMessage('Status is required')],
+  [body('status').notEmpty().withMessage('Status is required').isIn(['Pending', 'In Progress', 'Completed']).withMessage('Invalid status value')],
   updateTaskStatus
 );
 

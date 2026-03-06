@@ -22,7 +22,10 @@ router.get('/my-teams', getMyTeams);
 router.post(
   '/',
   authorizeRoles('Team Leader', 'Admin'),
-  [body('name').trim().notEmpty().withMessage('Team name is required')],
+  [
+    body('name').trim().notEmpty().withMessage('Team name is required').isLength({ max: 100 }).withMessage('Team name max 100 chars'),
+    body('description').optional().trim().isLength({ max: 1000 }).withMessage('Description max 1000 chars'),
+  ],
   createTeam
 );
 

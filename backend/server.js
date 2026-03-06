@@ -2,6 +2,9 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 const connectDB = require('./config/db');
 
 // Load env vars
@@ -12,9 +15,16 @@ connectDB();
 
 const app = express();
 
+// Security middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+app.use(mongoSanitize()); // Prevent NoSQL injection
+app.use(xss()); // Prevent XSS attacks
+
 // Middleware
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Static uploads folder
@@ -42,6 +52,34 @@ app.use('/api/upload', uploadRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'TaskFlow API is running...' });
+});
+
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error('Global error:', err.message);
+
+  // Multer file size error
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({ message: 'File too large. Maximum size is 5MB.' });
+  }
+
+  // Multer other errors
+  if (err.name === 'MulterError') {
+    return res.status(400).json({ message: err.message });
+  }
+
+  // Mongoose validation error
+  if (err.name === 'ValidationError') {
+    const messages = Object.values(err.errors).map(e => e.message);
+    return res.status(400).json({ message: messages.join(', ') });
+  }
+
+  // Mongoose duplicate key
+  if (err.code === 11000) {
+    return res.status(400).json({ message: 'Duplicate field value entered' });
+  }
+
+  res.status(err.status || 500).json({ message: err.message || 'Server error' });
 });
 
 const PORT = process.env.PORT || 5000;
