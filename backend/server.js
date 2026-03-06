@@ -24,9 +24,13 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 const authRoutes = require('./routes/authRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const commentRoutes = require('./routes/commentRoutes');
+const activityRoutes = require('./routes/activityRoutes');
 app.use('/api/auth', authRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/comments', commentRoutes);
+app.use('/api/activity', activityRoutes);
 
 app.get('/', (req, res) => {
   res.json({ message: 'TaskFlow API is running...' });
