@@ -4,7 +4,6 @@ const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
-const xss = require('xss-clean');
 const connectDB = require('./config/db');
 
 // Load env vars
@@ -20,7 +19,24 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 app.use(mongoSanitize()); // Prevent NoSQL injection
-app.use(xss()); // Prevent XSS attacks
+
+// Custom XSS sanitization middleware (xss-clean is incompatible with Express 4.x getter-only req.query)
+const xssFilters = require('xss-filters');
+app.use((req, res, next) => {
+  if (req.body) {
+    const sanitize = (obj) => {
+      for (const key in obj) {
+        if (typeof obj[key] === 'string') {
+          obj[key] = xssFilters.inHTMLData(obj[key]);
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitize(obj[key]);
+        }
+      }
+    };
+    sanitize(req.body);
+  }
+  next();
+});
 
 // Middleware
 app.use(cors());
