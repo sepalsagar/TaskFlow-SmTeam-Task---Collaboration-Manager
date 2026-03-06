@@ -3,7 +3,8 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const path = require('path');
 const helmet = require('helmet');
-const mongoSanitize = require('express-mongo-sanitize');
+const { sanitize: mongoSanitize } = require('express-mongo-sanitize');
+const xssFilters = require('xss-filters');
 const connectDB = require('./config/db');
 
 // Load env vars
@@ -18,30 +19,34 @@ const app = express();
 app.use(helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
-app.use(mongoSanitize()); // Prevent NoSQL injection
-
-// Custom XSS sanitization middleware (xss-clean is incompatible with Express 4.x getter-only req.query)
-const xssFilters = require('xss-filters');
-app.use((req, res, next) => {
-  if (req.body) {
-    const sanitize = (obj) => {
-      for (const key in obj) {
-        if (typeof obj[key] === 'string') {
-          obj[key] = xssFilters.inHTMLData(obj[key]);
-        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
-          sanitize(obj[key]);
-        }
-      }
-    };
-    sanitize(req.body);
-  }
-  next();
-});
 
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Sanitize req.body and req.params only (req.query is a read-only getter in Express 4.x)
+app.use((req, res, next) => {
+  if (req.body) {
+    // NoSQL injection prevention
+    req.body = mongoSanitize(req.body);
+    // XSS prevention
+    const xssSanitize = (obj) => {
+      for (const key in obj) {
+        if (typeof obj[key] === 'string') {
+          obj[key] = xssFilters.inHTMLData(obj[key]);
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          xssSanitize(obj[key]);
+        }
+      }
+    };
+    xssSanitize(req.body);
+  }
+  if (req.params) {
+    req.params = mongoSanitize(req.params);
+  }
+  next();
+});
 
 // Static uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
