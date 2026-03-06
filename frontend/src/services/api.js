@@ -64,4 +64,12 @@ export const searchTeams = (params) => API.get('/search/teams', { params });
 // Dashboard
 export const getDashboardStats = () => API.get('/dashboard/stats');
 
+// File Upload
+export const uploadTaskFile = (taskId, formData) =>
+  API.post(`/upload/task/${taskId}`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+export const deleteTaskAttachment = (taskId, index) =>
+  API.delete(`/upload/task/${taskId}/attachment/${index}`);
+
 export default API;

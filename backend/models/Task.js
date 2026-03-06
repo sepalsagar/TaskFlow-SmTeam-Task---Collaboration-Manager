@@ -47,8 +47,8 @@ const taskSchema = new mongoose.Schema(
     attachments: [
       {
         filename: String,
-        originalName: String,
         path: String,
+        mimetype: String,
         size: Number,
         uploadedAt: {
           type: Date,
