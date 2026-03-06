@@ -8,18 +8,27 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Allowed file extensions (double validation with MIME types)
+const allowedExtensions = [
+  '.jpg', '.jpeg', '.png', '.gif', '.webp',
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx',
+  '.txt', '.csv', '.zip',
+];
+
 // Storage configuration
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
+    // Sanitize filename - remove special characters except dots and hyphens
+    const sanitized = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_');
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+    cb(null, uniqueSuffix + '-' + sanitized);
   },
 });
 
-// File filter
+// File filter - validates both MIME type AND file extension
 const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     'image/jpeg', 'image/png', 'image/gif', 'image/webp',
@@ -34,10 +43,12 @@ const fileFilter = (req, file, cb) => {
     'application/x-zip-compressed',
   ];
 
-  if (allowedTypes.includes(file.mimetype)) {
+  const ext = path.extname(file.originalname).toLowerCase();
+
+  if (allowedTypes.includes(file.mimetype) && allowedExtensions.includes(ext)) {
     cb(null, true);
   } else {
-    cb(new Error('File type not allowed. Allowed: images, PDF, Word, Excel, text, CSV, ZIP'), false);
+    cb(new Error(`File type not allowed. Allowed extensions: ${allowedExtensions.join(', ')}`), false);
   }
 };
 
@@ -46,6 +57,7 @@ const upload = multer({
   fileFilter,
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB max
+    files: 1, // Single file per request
   },
 });
 
