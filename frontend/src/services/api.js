@@ -49,10 +49,13 @@ export const getActivityLogs = (params) => API.get('/activity', { params });
 
 // Admin
 export const getAllUsers = (params) => API.get('/admin/users', { params });
+export const getAdminUsers = getAllUsers;
 export const getAllTeams = (params) => API.get('/admin/teams', { params });
+export const getAdminTeams = () => API.get('/admin/teams');
 export const getAllTasks = (params) => API.get('/admin/tasks', { params });
 export const getAdminStats = () => API.get('/admin/stats');
-export const updateUserRole = (userId, data) => API.put(`/admin/users/${userId}/role`, data);
+export const updateUserRole = (userId, role) => API.put(`/admin/users/${userId}/role`, { role });
+export const deleteUser = (userId) => API.delete(`/admin/users/${userId}`);
 
 // Search
 export const searchTasks = (params) => API.get('/search/tasks', { params });
